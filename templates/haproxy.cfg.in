@@ -1,0 +1,27 @@
+global
+        log 127.0.0.1   local7  debug
+        maxconn  ${haproxy-config:maxconn}
+        user     ${haproxy-config:user}
+        group    ${haproxy-config:group}
+
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        retries 3
+        option  redispatch
+        timeout connect 30s
+        timeout client 50s
+        timeout server 50s
+
+backend zopes
+        #option httpclose
+        option httpchk
+        #option persist
+        option forwardfor
+        balance roundrobin
+        cookie serverid insert indirect nocache
+        server z1 ${instance:http-address} cookie z1 check inter 30s rise 2 fall 4 maxconn 20
+        server z2 ${instance2:http-address} cookie z2 check inter 30s rise 2 fall 4 maxconn 20
+        
